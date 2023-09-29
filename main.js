@@ -1,20 +1,9 @@
-import readline from "readline";
-import { arraysEqual } from "./utils.js";
-
-readline.emitKeypressEvents(process.stdin);
-
-process.stdin.on("keypress", (ch, key) => {
-  onKeyPress(key.name);
-  if (key && key.ctrl && key.name == "c") {
-    process.stdin.pause();
-  }
-});
-
-process.stdin.setRawMode(true);
+import { arraysEqual } from "./utils/helpers.js";
+import "./utils/events.js";
 
 let gameSize = [15, 12];
 let snakeTiles = [];
-let snakeVector = [1, 0];
+export let snakeVector = [1, 0];
 let started = false;
 let points = 0;
 let applePosition;
@@ -23,7 +12,7 @@ let initialSpeed = 500; // cycle for each 500ms
 let snakeTileMargin = 0;
 let gameInterval;
 
-const startGame = () => {
+export const startGame = () => {
   clearInterval(gameInterval);
   started = true;
   snakeTiles = Array(3)
@@ -68,7 +57,7 @@ const update = () => {
   draw();
 };
 
-const draw = () => {
+export const draw = () => {
   console.clear();
   if (!started) {
     console.log("Press enter to start");
@@ -90,33 +79,6 @@ const draw = () => {
   return;
   ctx.textAlign = "left";
   ctx.fillText(`Score: ${points}`, 4, canvas.height / 15);
-};
-
-const onKeyPress = (key) => {
-  switch (key) {
-    case "up":
-      if (arraysEqual(snakeVector, [0, 1])) return;
-      snakeVector = [0, -1];
-      break;
-    case "down":
-      if (arraysEqual(snakeVector, [0, -1])) return;
-      snakeVector = [0, 1];
-      break;
-    case "left":
-      if (arraysEqual(snakeVector, [1, 0])) return;
-      snakeVector = [-1, 0];
-      break;
-    case "right":
-      if (arraysEqual(snakeVector, [-1, 0])) return;
-      snakeVector = [1, 0];
-      break;
-    case "return":
-      startGame();
-      break;
-    default:
-      break;
-  }
-  draw();
 };
 
 // utils
@@ -141,6 +103,33 @@ const detectColition = () => {
     hasCollided = true;
   }
   return hasCollided;
+};
+
+export const onKeyPress = (key) => {
+  switch (key) {
+    case "up":
+      if (arraysEqual(snakeVector, [0, 1])) return;
+      snakeVector = [0, -1];
+      break;
+    case "down":
+      if (arraysEqual(snakeVector, [0, -1])) return;
+      snakeVector = [0, 1];
+      break;
+    case "left":
+      if (arraysEqual(snakeVector, [1, 0])) return;
+      snakeVector = [-1, 0];
+      break;
+    case "right":
+      if (arraysEqual(snakeVector, [-1, 0])) return;
+      snakeVector = [1, 0];
+      break;
+    case "return":
+      startGame();
+      break;
+    default:
+      break;
+  }
+  draw();
 };
 
 draw();
