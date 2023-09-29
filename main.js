@@ -1,15 +1,16 @@
-import { arraysEqual } from "../utils.js";
+import readline from "readline";
 
-gameSize = [15, 12];
-snakeTiles = [];
-snakeVector = [1, 0];
-started = false;
-points = 0;
-applePosition;
-speedFactor = 20; //doubles the speed  for each 20 points
-initialSpeed = 500; // cycle for each 500ms
-snakeTileMargin = 0;
-gameInterval;
+readline.emitKeypressEvents(process.stdin);
+
+process.stdin.on("keypress", (ch, key) => {
+  onKeyPress(key.name);
+  if (key && key.ctrl && key.name == "c") {
+    process.stdin.pause();
+  }
+});
+
+process.stdin.setRawMode(true);
+
 
 const startGame = () => {
   clearInterval(gameInterval);
@@ -94,23 +95,23 @@ const draw = () => {
 
 const onKeyPress = (key) => {
   switch (key) {
-    case "ArrowUp":
+    case "up":
       if (arraysEqual(snakeVector, [0, 1])) return;
       snakeVector = [0, -1];
       break;
-    case "ArrowDown":
+    case "down":
       if (arraysEqual(snakeVector, [0, -1])) return;
       snakeVector = [0, 1];
       break;
-    case "ArrowLeft":
+    case "left":
       if (arraysEqual(snakeVector, [1, 0])) return;
       snakeVector = [-1, 0];
       break;
-    case "ArrowRight":
+    case "right":
       if (arraysEqual(snakeVector, [-1, 0])) return;
       snakeVector = [1, 0];
       break;
-    case "Enter":
+    case "return":
       startGame();
       break;
     default:
