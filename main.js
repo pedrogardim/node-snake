@@ -1,4 +1,5 @@
 import readline from "readline";
+import { arraysEqual } from "./utils.js";
 
 readline.emitKeypressEvents(process.stdin);
 
@@ -11,6 +12,16 @@ process.stdin.on("keypress", (ch, key) => {
 
 process.stdin.setRawMode(true);
 
+let gameSize = [15, 12];
+let snakeTiles = [];
+let snakeVector = [1, 0];
+let started = false;
+let points = 0;
+let applePosition;
+let speedFactor = 20; //doubles the speed  for each 20 points
+let initialSpeed = 500; // cycle for each 500ms
+let snakeTileMargin = 0;
+let gameInterval;
 
 const startGame = () => {
   clearInterval(gameInterval);
@@ -56,39 +67,27 @@ const update = () => {
   if (detectColition()) onDeath();
   draw();
 };
+
 const draw = () => {
-  let tileSize = getTileSize();
-
-  //TODO: work on drawing
-  return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  console.clear();
   if (!started) {
-    ctx.textAlign = "center";
-    ctx.fillText("Press enter to start", canvas.width / 2, canvas.height / 2);
+    console.log("Press enter to start");
     return;
   }
 
-  snakeTiles.forEach((tile) => {
-    ctx.fillRect(
-      tileSize[0] * tile[0] + snakeTileMargin / 2,
-      tileSize[1] * tile[1] - snakeTileMargin / 2,
-      tileSize[0] - snakeTileMargin + 1,
-      tileSize[1] - snakeTileMargin + 1
-    );
-  });
+  for (let x = 0; x < gameSize[1] + 2; x++) {
+    let line = "";
+    for (let y = 0; y < gameSize[0]; y++) {
+      line += snakeTiles.find((a) => a[0] === y && a[1] === x)
+        ? "█"
+        : applePosition[0] === y && applePosition[1] === x
+        ? "O"
+        : " ";
+    }
+    console.log(line);
+  }
 
-  let appleRadius = tileSize[1] / 5;
-  ctx.beginPath();
-  ctx.arc(
-    tileSize[0] * applePosition[0] + tileSize[0] / 2,
-    tileSize[1] * applePosition[1] + tileSize[1] / 2 - appleRadius / 2,
-    appleRadius,
-    0,
-    2 * Math.PI
-  );
-  ctx.fill();
-
+  return;
   ctx.textAlign = "left";
   ctx.fillText(`Score: ${points}`, 4, canvas.height / 15);
 };
@@ -117,6 +116,7 @@ const onKeyPress = (key) => {
     default:
       break;
   }
+  draw();
 };
 
 // utils
@@ -124,9 +124,7 @@ const onKeyPress = (key) => {
 const getRandomPosition = () => {
   return gameSize.map((dim) => Math.floor(Math.random() * dim));
 };
-const getTileSize = () => {
-  return [canvas.width / gameSize[0], canvas.height / gameSize[1]];
-};
+
 const detectColition = () => {
   let hasCollided = false;
   const head = snakeTiles[snakeTiles.length - 1];
@@ -144,3 +142,5 @@ const detectColition = () => {
   }
   return hasCollided;
 };
+
+draw();
