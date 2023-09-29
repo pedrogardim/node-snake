@@ -1,4 +1,3 @@
-import { sounds } from "../sounds.js";
 import { arraysEqual } from "../utils.js";
 
 export class SnakeGameController {
@@ -12,14 +11,11 @@ export class SnakeGameController {
   initialSpeed = 500; // cycle for each 500ms
   snakeTileMargin = 0;
   gameInterval;
-  canvas;
-  ctx;
 
   constructor() {
     this.init();
   }
   init() {
-    this.initCanvas();
     this.draw();
   }
   startGame() {
@@ -32,8 +28,6 @@ export class SnakeGameController {
     this.points = 0;
     this.createApple();
     this.gameInterval = setInterval(() => this.update(), this.initialSpeed);
-    sounds.player("start").start();
-    sounds.player("music").start();
   }
   onDeath() {
     clearInterval(this.gameInterval);
@@ -41,8 +35,6 @@ export class SnakeGameController {
     this.snakeVector = [1, 0];
     this.points = 0;
     this.started = false;
-    sounds.player("music").stop();
-    sounds.player("death").start();
   }
   createApple() {
     let newPos = this.getRandomPosition();
@@ -58,7 +50,6 @@ export class SnakeGameController {
     let newSpeed =
       this.initialSpeed / (1 + 1 * ((this.points + 1) / this.speedFactor));
     this.gameInterval = setInterval(() => this.update(), newSpeed);
-    sounds.player("coin").start();
   }
   update() {
     let lastTile = this.snakeTiles[this.snakeTiles.length - 1];
@@ -72,16 +63,12 @@ export class SnakeGameController {
     if (this.detectColition()) this.onDeath();
     this.draw();
   }
-  initCanvas() {
-    this.canvas = document.getElementById("game");
-    this.canvas.width = 500;
-    this.canvas.height = this.canvas.width * 0.8;
-    this.ctx = this.canvas.getContext("2d");
-    this.ctx.fillStyle = "#350";
-    this.ctx.font = `${this.canvas.height / 15}px Silkscreen`;
-  }
   draw() {
     let tileSize = this.getTileSize();
+
+    //TODO: work on drawing
+    return;
+
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.started) {
       this.ctx.textAlign = "center";
