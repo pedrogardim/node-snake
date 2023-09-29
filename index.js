@@ -1,15 +1,14 @@
-import { arraysEqual } from "./utils/helpers.js";
-import "./utils/events.js";
+import { arraysEqual } from "./src/utils/helpers.js";
+import "./src/utils/events.js";
 
 let gameSize = [15, 12];
 let snakeTiles = [];
-export let snakeVector = [1, 0];
+let snakeVector = [1, 0];
 let started = false;
 let points = 0;
 let applePosition;
 let speedFactor = 20; //doubles the speed  for each 20 points
 let initialSpeed = 500; // cycle for each 500ms
-let snakeTileMargin = 0;
 let gameInterval;
 
 export const startGame = () => {
