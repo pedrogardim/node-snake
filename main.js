@@ -1,158 +1,145 @@
 import { arraysEqual } from "../utils.js";
 
-export class SnakeGameController {
-  gameSize = [15, 12];
+gameSize = [15, 12];
+snakeTiles = [];
+snakeVector = [1, 0];
+started = false;
+points = 0;
+applePosition;
+speedFactor = 20; //doubles the speed  for each 20 points
+initialSpeed = 500; // cycle for each 500ms
+snakeTileMargin = 0;
+gameInterval;
+
+const startGame = () => {
+  clearInterval(gameInterval);
+  started = true;
+  snakeTiles = Array(3)
+    .fill([0, Math.floor(gameSize[1] / 2)])
+    .map((pos) => [Math.floor(gameSize[0] / 2), pos[1]]);
+  snakeVector = [1, 0];
+  points = 0;
+  createApple();
+  gameInterval = setInterval(() => update(), initialSpeed);
+};
+const onDeath = () => {
+  clearInterval(gameInterval);
   snakeTiles = [];
   snakeVector = [1, 0];
-  started = false;
   points = 0;
-  applePosition;
-  speedFactor = 20; //doubles the speed  for each 20 points
-  initialSpeed = 500; // cycle for each 500ms
-  snakeTileMargin = 0;
-  gameInterval;
+  started = false;
+};
+const createApple = () => {
+  let newPos = getRandomPosition();
+  while (snakeTiles.find((tile) => arraysEqual(newPos, tile))) {
+    newPos = getRandomPosition();
+  }
+  applePosition = newPos;
+};
+const onAppleEaten = () => {
+  points++;
+  createApple();
+  clearInterval(gameInterval);
+  let newSpeed = initialSpeed / (1 + 1 * ((points + 1) / speedFactor));
+  gameInterval = setInterval(() => update(), newSpeed);
+};
+const update = () => {
+  let lastTile = snakeTiles[snakeTiles.length - 1];
+  let newTile = lastTile.map((d, i) => d + snakeVector[i]);
+  snakeTiles.push(newTile);
+  if (arraysEqual(newTile, applePosition)) {
+    onAppleEaten();
+  } else {
+    snakeTiles.shift();
+  }
+  if (detectColition()) onDeath();
+  draw();
+};
+const draw = () => {
+  let tileSize = getTileSize();
 
-  constructor() {
-    this.init();
-  }
-  init() {
-    this.draw();
-  }
-  startGame() {
-    clearInterval(this.gameInterval);
-    this.started = true;
-    this.snakeTiles = Array(3)
-      .fill([0, Math.floor(this.gameSize[1] / 2)])
-      .map((pos) => [Math.floor(this.gameSize[0] / 2), pos[1]]);
-    this.snakeVector = [1, 0];
-    this.points = 0;
-    this.createApple();
-    this.gameInterval = setInterval(() => this.update(), this.initialSpeed);
-  }
-  onDeath() {
-    clearInterval(this.gameInterval);
-    this.snakeTiles = [];
-    this.snakeVector = [1, 0];
-    this.points = 0;
-    this.started = false;
-  }
-  createApple() {
-    let newPos = this.getRandomPosition();
-    while (this.snakeTiles.find((tile) => arraysEqual(newPos, tile))) {
-      newPos = this.getRandomPosition();
-    }
-    this.applePosition = newPos;
-  }
-  onAppleEaten() {
-    this.points++;
-    this.createApple();
-    clearInterval(this.gameInterval);
-    let newSpeed =
-      this.initialSpeed / (1 + 1 * ((this.points + 1) / this.speedFactor));
-    this.gameInterval = setInterval(() => this.update(), newSpeed);
-  }
-  update() {
-    let lastTile = this.snakeTiles[this.snakeTiles.length - 1];
-    let newTile = lastTile.map((d, i) => d + this.snakeVector[i]);
-    this.snakeTiles.push(newTile);
-    if (arraysEqual(newTile, this.applePosition)) {
-      this.onAppleEaten();
-    } else {
-      this.snakeTiles.shift();
-    }
-    if (this.detectColition()) this.onDeath();
-    this.draw();
-  }
-  draw() {
-    let tileSize = this.getTileSize();
+  //TODO: work on drawing
+  return;
 
-    //TODO: work on drawing
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!started) {
+    ctx.textAlign = "center";
+    ctx.fillText("Press enter to start", canvas.width / 2, canvas.height / 2);
     return;
+  }
 
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    if (!this.started) {
-      this.ctx.textAlign = "center";
-      this.ctx.fillText(
-        "Press enter to start",
-        this.canvas.width / 2,
-        this.canvas.height / 2
-      );
-      return;
-    }
-
-    this.snakeTiles.forEach((tile) => {
-      this.ctx.fillRect(
-        tileSize[0] * tile[0] + this.snakeTileMargin / 2,
-        tileSize[1] * tile[1] - this.snakeTileMargin / 2,
-        tileSize[0] - this.snakeTileMargin + 1,
-        tileSize[1] - this.snakeTileMargin + 1
-      );
-    });
-
-    let appleRadius = tileSize[1] / 5;
-    this.ctx.beginPath();
-    this.ctx.arc(
-      tileSize[0] * this.applePosition[0] + tileSize[0] / 2,
-      tileSize[1] * this.applePosition[1] + tileSize[1] / 2 - appleRadius / 2,
-      appleRadius,
-      0,
-      2 * Math.PI
+  snakeTiles.forEach((tile) => {
+    ctx.fillRect(
+      tileSize[0] * tile[0] + snakeTileMargin / 2,
+      tileSize[1] * tile[1] - snakeTileMargin / 2,
+      tileSize[0] - snakeTileMargin + 1,
+      tileSize[1] - snakeTileMargin + 1
     );
-    this.ctx.fill();
+  });
 
-    this.ctx.textAlign = "left";
-    this.ctx.fillText(`Score: ${this.points}`, 4, this.canvas.height / 15);
+  let appleRadius = tileSize[1] / 5;
+  ctx.beginPath();
+  ctx.arc(
+    tileSize[0] * applePosition[0] + tileSize[0] / 2,
+    tileSize[1] * applePosition[1] + tileSize[1] / 2 - appleRadius / 2,
+    appleRadius,
+    0,
+    2 * Math.PI
+  );
+  ctx.fill();
+
+  ctx.textAlign = "left";
+  ctx.fillText(`Score: ${points}`, 4, canvas.height / 15);
+};
+
+const onKeyPress = (key) => {
+  switch (key) {
+    case "ArrowUp":
+      if (arraysEqual(snakeVector, [0, 1])) return;
+      snakeVector = [0, -1];
+      break;
+    case "ArrowDown":
+      if (arraysEqual(snakeVector, [0, -1])) return;
+      snakeVector = [0, 1];
+      break;
+    case "ArrowLeft":
+      if (arraysEqual(snakeVector, [1, 0])) return;
+      snakeVector = [-1, 0];
+      break;
+    case "ArrowRight":
+      if (arraysEqual(snakeVector, [-1, 0])) return;
+      snakeVector = [1, 0];
+      break;
+    case "Enter":
+      startGame();
+      break;
+    default:
+      break;
   }
-  onKeyPress(key) {
-    switch (key) {
-      case "ArrowUp":
-        if (arraysEqual(this.snakeVector, [0, 1])) return;
-        this.snakeVector = [0, -1];
-        break;
-      case "ArrowDown":
-        if (arraysEqual(this.snakeVector, [0, -1])) return;
-        this.snakeVector = [0, 1];
-        break;
-      case "ArrowLeft":
-        if (arraysEqual(this.snakeVector, [1, 0])) return;
-        this.snakeVector = [-1, 0];
-        break;
-      case "ArrowRight":
-        if (arraysEqual(this.snakeVector, [-1, 0])) return;
-        this.snakeVector = [1, 0];
-        break;
-      case "Enter":
-        this.startGame();
-        break;
-      default:
-        break;
-    }
-  }
-  // utils
-  getRandomPosition() {
-    return this.gameSize.map((dim) => Math.floor(Math.random() * dim));
-  }
-  getTileSize() {
-    return [
-      this.canvas.width / this.gameSize[0],
-      this.canvas.height / this.gameSize[1],
-    ];
-  }
-  detectColition() {
-    let hasCollided = false;
-    const head = this.snakeTiles[this.snakeTiles.length - 1];
-    this.snakeTiles.forEach((tile, index) => {
-      if (index !== this.snakeTiles.length - 1 && arraysEqual(tile, head))
-        hasCollided = true;
-    });
-    if (
-      head[0] >= this.gameSize[0] ||
-      head[1] >= this.gameSize[1] ||
-      head[0] < 0 ||
-      head[1] < 0
-    ) {
+};
+
+// utils
+
+const getRandomPosition = () => {
+  return gameSize.map((dim) => Math.floor(Math.random() * dim));
+};
+const getTileSize = () => {
+  return [canvas.width / gameSize[0], canvas.height / gameSize[1]];
+};
+const detectColition = () => {
+  let hasCollided = false;
+  const head = snakeTiles[snakeTiles.length - 1];
+  snakeTiles.forEach((tile, index) => {
+    if (index !== snakeTiles.length - 1 && arraysEqual(tile, head))
       hasCollided = true;
-    }
-    return hasCollided;
+  });
+  if (
+    head[0] >= gameSize[0] ||
+    head[1] >= gameSize[1] ||
+    head[0] < 0 ||
+    head[1] < 0
+  ) {
+    hasCollided = true;
   }
-}
+  return hasCollided;
+};
