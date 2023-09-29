@@ -1,6 +1,6 @@
 import readline from "readline";
 
-import { onKeyPress } from "../main.js";
+import { onKeyPress } from "../../index.js";
 
 readline.emitKeypressEvents(process.stdin);
 
